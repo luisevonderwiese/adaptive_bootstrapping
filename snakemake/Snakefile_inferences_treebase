@@ -1,0 +1,54 @@
+import os
+import sys
+import pathlib
+
+
+
+d = "../data/treebase/msa" 
+res_d = "../data/treebase/bootstrapping"
+msa_paths = [os.path.join(d, fn) for fn in os.listdir(d)]
+msa_names = [str(os.path.split(pth)[1]).split(".")[0] for pth in msa_paths]
+msa_names = [name for name in msa_names if name != ""]
+#msa_paths = [os.path.join(msa_path, "gtr_g_sim_msa.fasta") for msa_path in msa_paths]
+msas = dict(zip(msa_names, msa_paths))
+
+raxmlng_prefix = pathlib.Path(res_d) / "{msa}"/ "inference"
+
+rule all:
+    input:
+        expand(raxmlng_prefix.with_suffix(".raxml.bestTree"), msa=msa_names),
+
+
+
+
+rule bootstrapping:
+    output:
+        raxml_bootstraps = raxmlng_prefix.with_suffix(".raxml.bestTree"),
+    params:
+        prefix  = str(raxmlng_prefix),
+        msa     = lambda wildcards: msas[wildcards.msa],
+    log:
+        raxml_log = raxmlng_prefix.with_suffix(".raxml.inference.log")
+    threads: 8
+    resources:
+        mem_mb = 4000,
+        disk_mb = 4000,
+        run_time = 480,
+    shell:
+        "./raxml-ng "
+        "--msa {params.msa} "
+        "--model  GTR+G "
+        "--prefix {params.prefix} "
+        "--seed 2 "
+        "--threads 8 "
+       # "--force model_lh_impr "
+        #"--force perf_threads "
+        "> {log.raxml_log} "
+
+
+
+
+
+
+
+

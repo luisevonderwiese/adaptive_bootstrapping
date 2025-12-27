@@ -1,0 +1,1 @@
+snakemake --profile /home/haeusele/.config/snakemake/slurm
