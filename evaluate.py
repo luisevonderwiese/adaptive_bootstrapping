@@ -18,8 +18,8 @@ def get_bipartition(node):
 
 def evaluate(base_dir, prefix, name, factor, check_true_tree):
     out_path = os.path.join(base_dir, name + ".csv")
-    if os.path.isfile(out_path):
-        return
+    #if os.path.isfile(out_path):
+    #    return
     results_dir = os.path.join(base_dir, "bootstrapping")
     data_dir = os.path.join(base_dir, "msa")
     results = []
@@ -90,5 +90,8 @@ def evaluate(base_dir, prefix, name, factor, check_true_tree):
 
 #evaluate("data/sim", "bootstrap", "sbs_Support", 1, True)
 #evaluate("data/sim", "tbe", "tbe_Support", 100, True)
-evaluate("data/treebase", "fbp", "sbs_Support", 1, False)
-evaluate("data/treebase", "tbe", "tbe_Support", 100, False)
+evaluate("data/sim", "fbp_true", "sbs_Support_true", 1, False)
+evaluate("data/sim", "fbp_ml", "sbs_Support_ml", 1, True)
+#evaluate("data/treebase", "fbp", "sbs_Support", 1, False)
+evaluate("data/treebase", "fbp_ml", "sbs_Support_ml", 1, False)
+#evaluate("data/treebase", "tbe", "tbe_Support", 100, False)

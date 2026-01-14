@@ -23,16 +23,25 @@ def average_pairwise_dist(path):
 
 #sim ml trees
 label_dir = "data/sim/difficulty_labels"
-res = []
+outpath = "data/sim/dist_ml.csv"
+if not os.path.isfile(outpath):#
+    done_datasets = []
+    with open(outpath, "w+") as outfile:
+        outfile.write("dataset,avg_rf_dist\n")
+else:
+    done_datasets = list(pd.read_csv(outpath)["dataset"])
 for ds in os.listdir(label_dir):
+    if ds in done_datasets:
+        continue
     ml_trees_path = os.path.join(label_dir, ds, "labelGen.raxml.mlTrees")
+    if not os.path.isfile(ml_trees_path):
+        continue
     avg_dist = average_pairwise_dist(ml_trees_path)
     print(avg_dist)
-    res.append([ds, avg_dist])
+    with open(outpath, "a") as outfile:
+        outfile.write(ds + "," + str(avg_dist) + "\n")
 
-df = pd.DataFrame(res, columns = ["dataset", "avg_rf_dist"])
-df.to_csv("data/sim/dist_ml.csv")
-
+assert(False)
 
 #sim bs trees
 bs_dir = "data/sim/bootstrapping"

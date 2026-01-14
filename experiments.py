@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from tabulate import tabulate
 from collections import Counter
 from sklearn.metrics import roc_auc_score
+import seaborn as sns
 
 def plot_mean_confidences(confidences, mode):
     for bin, confidence_dicts in confidences.items():
@@ -274,6 +275,12 @@ def thresholds(sub_dfs, level_of_risk):
     tab = tabulate(res, headers = ["difficulty", "threshold", "power"], tablefmt = "pipe")
     print(tab)
 
+def plot_sizes(input_df):
+    plt.scatter(input_df["size"], input_df["difficulty"], s = 10)
+    plt.xlabel("Tree size")
+    plt.ylabel("Difficulty")
+    plt.savefig(os.path.join(plots_dir, "sizes.png"))
+    plt.clf()
 
 def plot_counts(meta_dfs):
     row_count = 3
@@ -296,6 +303,18 @@ def plot_counts(meta_dfs):
         ax.set_title("[" + str(lower) + ", " + str(round(lower + step_size, 1)) + ")")
     fig.legend(axes[0][0].get_legend_handles_labels()[1])
     plt.savefig(os.path.join(plots_dir, "counts.png"))
+    plt.clf()
+
+def plot_counts_boxplots(meta_dfs):
+    counts = {}
+    plt.figure(figsize=(20, 10))
+    for lower, meta_df in meta_dfs.items():
+        this_counts = []
+        for i, row in meta_df.iterrows():
+            this_counts += int(row["num_correct"] + row["num_incorrect"]) * [row["support_value"]]
+        counts[interval_lable(lower)] = this_counts
+    sns.violinplot(counts, palette = sns.color_palette("husl", len(counts)))
+    plt.savefig(os.path.join(plots_dir, "counts_box.png"))
     plt.clf()
 
 
@@ -359,41 +378,42 @@ def plot_avg_supports(dfs):
     plt.clf()
 
 
-data_type = "sim"
-support_data = "sbs_Support"
-#support_data = "tbe_Support"
 step_size = 0.1
 
-plots_dir = os.path.join("data", data_type, "plots", support_data)
-if not os.path.isdir(plots_dir):
-    os.makedirs(plots_dir)
+for data_type in ["sim", "treebase"]:
+    #for support_data in ["sbs_Support", "sbs_Support_true", "sbs_Support_ml", "tbe_Support"]:
+    for support_data in ["sbs_Support_true", "sbs_Support_ml"]:
+        if data_type == "treebase" and support_data == "sbs_Support_true":
+            continue
+        plots_dir = os.path.join("data", data_type, "plots", support_data)
+        if not os.path.isdir(plots_dir):
+            os.makedirs(plots_dir)
 
-input_df = load_data(data_type, support_data)
+        input_df = load_data(data_type, support_data)
 
-#treewise_df = treewise(input_df, "confidence")
-#plot_treewise(treewise_df, "confidence")
+        #determine statisics per tree and consider average
+        #treewise_df = treewise(input_df, "confidence")
+        #plot_treewise(treewise_df, "confidence")
+        #treewise_df = treewise(input_df, "tp_relative")
+        #plot_treewise(treewise_df, "tp_relative")
 
-#treewise_df = treewise(input_df, "tp_relative")
-#plot_treewise(treewise_df, "tp_relative")
+        #plot_sizes(input_df)
 
-plt.scatter(input_df["size"], input_df["difficulty"], s = 10)
-plt.xlabel("Tree size")
-plt.ylabel("Difficulty")
-plt.savefig(os.path.join(plots_dir, "sizes.png"))
-plt.clf()
+        sub_dfs =  get_sub_dfs(input_df)
+        meta_dfs = get_meta_dfs(sub_dfs)
 
-sub_dfs =  get_sub_dfs(input_df)
+        plot_counts_boxplots(meta_dfs)
+        if data_type == "treebase" or support_data == "sbs_Support_true":
+            continue
+        plot_counts(meta_dfs)
 
-thresholds(sub_dfs, 0.1)
-thresholds(sub_dfs, 0.05)
-auc_scores(sub_dfs)
+        thresholds(sub_dfs, 0.1)
+        thresholds(sub_dfs, 0.05)
+        auc_scores(sub_dfs)
 
-window_dfs = get_window_dfs(sub_dfs)
-plot_comb(window_dfs, "support_value", "fraction_in_tt", float("nan"), True)
+        plot_comb(meta_dfs, "support_value", "tp_relative")
+        plot_comb(meta_dfs, "support_value", "confidence", horz = 0.9)
+        plot_comb(meta_dfs, "alpha", "power")
 
-meta_dfs = get_meta_dfs(sub_dfs)
-
-plot_counts(meta_dfs)
-plot_comb(meta_dfs, "support_value", "tp_relative")
-plot_comb(meta_dfs, "support_value", "confidence", horz = 0.9)
-plot_comb(meta_dfs, "alpha", "power")
+        window_dfs = get_window_dfs(sub_dfs)
+        plot_comb(window_dfs, "support_value", "fraction_in_tt", float("nan"), True)

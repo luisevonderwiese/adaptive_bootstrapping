@@ -37,8 +37,8 @@ rule bootstrapping:
     shell:
     	"label "
     	"-m {params.msa} "
-    	"-r ../treebase_bootstrapping/raxml-ng "
-    	"-i ../treebase_bootstrapping/iqtree2 "
+    	"-r /hits/fast/cme/haeusele/adaptive_bootstrapping/snakemake/raxml-ng "
+    	"-i /hits/fast/cme/haeusele/adaptive_bootstrapping/snakemake/iqtree2 "
     	"-p {params.prefix} "
     	"--ntrees 100 "
     	"> {log.raxml_log} "
