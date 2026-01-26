@@ -55,15 +55,14 @@ if not os.path.isdir(outdir):
 msa_dir = "/hits/fast/cme/hoehledi/example_workflow/run_sparta/out/tb_mirror"
 for i, row in test.iterrows():
     ds = row["dataset"]
-    src = os.path.join("data", ds, "gtr_g_sim_msa.fasta")
-    dest_dir = os.path.join("subset", ds)
+    dest_dir = os.path.join(outdir, ds)
     if not os.path.isdir(dest_dir):
         os.makedirs(dest_dir)
     dest = os.path.join(dest_dir, "gtr_g_sim_msa.fasta")
-    src = os.path.join("data", ds, "gtr_g_sim_msa.fasta")
+    src = os.path.join(msa_dir, ds, "gtr_g_sim_msa.fasta")
     shutil.copy(src, dest)
     dest = os.path.join(dest_dir, "gtr_g.raxml.bestTree")
-    src = os.path.join("data", ds, "gtr_g.raxml.bestTree")
+    src = os.path.join(msa_dir, ds, "gtr_g.raxml.bestTree")
     shutil.copy(src, dest)
 
 

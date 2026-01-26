@@ -17,7 +17,8 @@ for ds in os.listdir(data_dir):
 df = pd.DataFrame(lengths, columns=["dataset", "size"])
 df.to_csv("data/treebase/sizes.csv")
 
-data_dir = "data/sim/msa"
+#data_dir = "data/sim/msa"
+data_dir = "data/sim_difficult/msa"
 lengths = []
 for ds in os.listdir(data_dir):
     msa_path = os.path.join(data_dir, ds, "gtr_g_sim_msa.fasta")
@@ -29,5 +30,5 @@ for ds in os.listdir(data_dir):
         length = content.count(">")
         lengths.append([ds.split(".")[0], length])
 df = pd.DataFrame(lengths, columns=["dataset", "size"])
-df.to_csv("data/sim/sizes.csv")
-
+#df.to_csv("data/sim/sizes.csv")
+df.to_csv("data/sim_difficult/sizes.csv")

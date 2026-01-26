@@ -3,8 +3,12 @@ from ete3 import Tree
 import pandas as pd
 
 def rf_dist(t1, t2):
-    rf, max_rf, common_leaves, parts_t1, parts_t2, discard_t1, discart_t2 = t1.robinson_foulds(t2, unrooted_trees=True)
-    return rf / max_rf
+    try:
+        rf, max_rf, common_leaves, parts_t1, parts_t2, discard_t1, discart_t2 = t1.robinson_foulds(t2, unrooted_trees=True)
+        return rf / max_rf
+    except Exception as e:
+        print(e)
+        return float("nan")
 
 
 
@@ -41,43 +45,63 @@ for ds in os.listdir(label_dir):
     with open(outpath, "a") as outfile:
         outfile.write(ds + "," + str(avg_dist) + "\n")
 
-assert(False)
-
 #sim bs trees
 bs_dir = "data/sim/bootstrapping"
-res = []
+outpath = "data/sim/dist_bs.csv"
+if not os.path.isfile(outpath):#
+    done_datasets = []
+    with open(outpath, "w+") as outfile:
+        outfile.write("dataset,avg_rf_dist\n")
+else:
+    done_datasets = list(pd.read_csv(outpath)["dataset"])
 for ds in os.listdir(bs_dir):
+    if ds in done_datasets:
+        continue
     bs_trees_path = os.path.join(bs_dir, ds, "bootstrap.raxml.bootstraps")
+    if not os.path.isfile(bs_trees_path):
+        continue
     avg_dist = average_pairwise_dist(bs_trees_path)
     print(avg_dist)
-    res.append([ds, avg_dist])
-
-df = pd.DataFrame(res, columns = ["dataset", "avg_rf_dist"])
-df.to_csv("data/sim/dist_bs.csv")
-
+    with open(outpath, "a") as outfile:
+        outfile.write(ds + "," + str(avg_dist) + "\n")
 
 #treebase ml trees
 ml_dir = "data/treebase/ml_trees"
-res = []
+outpath = "data/treebase/dist_ml.csv"
+if not os.path.isfile(outpath):#
+    done_datasets = []
+    with open(outpath, "w+") as outfile:
+        outfile.write("dataset,avg_rf_dist\n")
+else:
+    done_datasets = list(pd.read_csv(outpath)["dataset"])
 for ds in os.listdir(ml_dir):
+    if ds in done_datasets:
+        continue
     ml_trees_path = os.path.join(ml_dir, ds)
+    if not os.path.isfile(ml_trees_path):
+        continue
     avg_dist = average_pairwise_dist(ml_trees_path)
     print(avg_dist)
-    res.append([ds.split(".")[0], avg_dist])
-
-df = pd.DataFrame(res, columns = ["dataset", "avg_rf_dist"])
-df.to_csv("data/treebase/dist_ml.csv")
-
+    with open(outpath, "a") as outfile:
+        outfile.write(ds + "," + str(avg_dist) + "\n")
 
 #treebase bs trees
 bs_dir = "data/treebase/bootstrapping"
-res = []
+outpath = "data/treebase/dist_bs.csv"
+if not os.path.isfile(outpath):#
+    done_datasets = []
+    with open(outpath, "w+") as outfile:
+        outfile.write("dataset,avg_rf_dist\n")
+else:
+    done_datasets = list(pd.read_csv(outpath)["dataset"])
 for ds in os.listdir(bs_dir):
+    if ds in done_datasets:
+        continue
     bs_trees_path = os.path.join(bs_dir, ds, "bootstrap.raxml.bootstraps")
+    if not os.path.isfile(bs_trees_path):
+        continue
     avg_dist = average_pairwise_dist(bs_trees_path)
     print(avg_dist)
-    res.append([ds, avg_dist])
-
-df = pd.DataFrame(res, columns = ["dataset", "avg_rf_dist"])
-df.to_csv("data/treebase/dist_bs.csv")
+    with open(outpath, "a") as outfile:
+        outfile.write(ds + "," + str(avg_dist) + "\n")
 
