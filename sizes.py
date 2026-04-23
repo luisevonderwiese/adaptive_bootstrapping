@@ -13,8 +13,9 @@ for ds in os.listdir(data_dir):
     with open(msa_path, "r") as msa_file:
         line = msa_file.readlines()[0]
         length = int(line.split(" ")[1])
-        lengths.append([ds.split(".")[0], length])
-df = pd.DataFrame(lengths, columns=["dataset", "size"])
+        seq_len = int(line.split(" ")[2])
+        lengths.append([ds.split(".")[0], length, seq_len])
+df = pd.DataFrame(lengths, columns=["dataset", "size", "seq_len"])
 df.to_csv("data/treebase/sizes.csv")
 
 data_dir = "data/sim/msa"
@@ -27,6 +28,8 @@ for ds in os.listdir(data_dir):
     with open(msa_path, "r") as msa_file:
         content = msa_file.read()
         length = content.count(">")
-        lengths.append([ds.split(".")[0], length])
-df = pd.DataFrame(lengths, columns=["dataset", "size"])
+        content.split("\n")
+        seq_len = len(content.split("\n")[1])
+        lengths.append([ds.split(".")[0], length, seq_len])
+df = pd.DataFrame(lengths, columns=["dataset", "size", "seq_len"])
 df.to_csv("data/sim/sizes.csv")

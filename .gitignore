@@ -1,3 +1,5 @@
 data/
 sim_data_sampling/output
 snakemake/.snakemake/
+old_scripts/
+problematic/
