@@ -1,0 +1,39 @@
+import os
+import sys
+import pathlib
+import pandas as pd
+
+basedir = "/hits/fast/cme/haeusele/adaptive_bootstrapping/data_new"
+cats = ["treebase", "sim"]
+msas = {}
+all_msa_names = {}
+for cat in ["treebase", "sim"]:
+    msa_dir = os.path.join(basedir, cat, "msa")
+    msa_paths = [os.path.join(msa_dir, fn, "msa.fasta") for fn in os.listdir(msa_dir)]
+    msa_names = [fn.split(".")[0] for fn in os.listdir(msa_dir)]
+    msa_names = [name for name in msa_names if name != ""]
+    msas[cat] = dict(zip(msa_names, msa_paths))
+    all_msa_names[cat] = msa_names
+
+msa_nodup_path = os.path.join(basedir, "{cat}", "msa_nodup", "{msa}.phy")
+raxmlng_prefix = os.path.join(basedir, "{cat}", "raxml", "{msa}", "default_inference")
+selection_stats_path = os.path.join(basedir, "{cat}", "selection_stats", "{msa}.csv")
+
+rule all:
+    input:
+        expand(selection_stats_path, cat = ["treebase"], msa=all_msa_names["treebase"]) + \
+        expand(selection_stats_path, cat = ["sim"], msa=all_msa_names["sim"]),
+
+include: "rules/remove_duplicates.smk"
+include: "rules/default_inference.smk"
+include: "rules/selection_stats.smk"
+
+
+
+
+
+
+
+
+
+

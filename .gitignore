@@ -1,5 +1,7 @@
 data/
+data_new/
+test_data/
 sim_data_sampling/output
-snakemake/.snakemake/
+snakemake_new/.snakemake/
 old_scripts/
 problematic/

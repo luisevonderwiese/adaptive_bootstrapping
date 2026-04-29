@@ -1,0 +1,57 @@
+import os
+import sys
+import pathlib
+
+d = "../data/sim/msa"
+res_d = "../data/sim/bootstrapping"
+msa_paths = [os.path.join(d, fn) for fn in os.listdir(d)]
+msa_names = [str(os.path.split(pth)[1]).split(".")[0] for pth in msa_paths]
+msa_names = [name for name in msa_names if name != ""]
+msa_paths = [os.path.join(msa_path, "gtr_g_sim_msa.fasta") for msa_path in msa_paths]
+msas = dict(zip(msa_names, msa_paths))
+
+raxmlng_prefix = pathlib.Path(res_d) / "{msa}"/ "ebg"
+best_tree = pathlib.Path(res_d) / "{msa}"/ "bootstrap.raxml.bestTree"
+best_model = pathlib.Path(res_d) / "{msa}"/ "bootstrap.raxml.bestModel"
+
+rule all:
+    input:
+        expand(raxmlng_prefix.with_suffix(".raxml.supportEBG"), msa=msa_names),
+
+
+
+
+rule bootstrapping:
+    output:
+        raxml_bootstraps = raxmlng_prefix.with_suffix(".raxml.supportEBG"),
+    params:
+        prefix  = str(raxmlng_prefix),
+        best_tree = str(best_tree),
+        best_model = str(best_model),
+        msa     = lambda wildcards: msas[wildcards.msa],
+    log:
+        raxml_log = raxmlng_prefix.with_suffix(".raxml.ebg.log")
+    threads: 8
+    resources:
+        mem_mb = 4000,
+        disk_mb = 4000,
+        run_time = 480,
+    shell:
+        "./raxml-ng-2 --ebg "
+        "--msa {params.msa} "
+        "--tree {params.best_tree} "
+        "--model {params.best_model} "
+        "--prefix {params.prefix} "
+        "--seed 2 "
+        "--threads 8 "
+        "--force model_lh_impr "
+        #"--force perf_threads "
+        "> {log.raxml_log} "
+
+
+
+
+
+
+
+

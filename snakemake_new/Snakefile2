@@ -1,0 +1,80 @@
+import os
+import sys
+import pathlib
+import pandas as pd
+
+basedir = "/hits/fast/cme/haeusele/adaptive_bootstrapping/test_data"
+cats = ["treebase", "sim"]
+msas = {}
+all_msa_names = {}
+for cat in ["treebase", "sim"]:
+    msa_dir = os.path.join(basedir, cat, "msa")
+    msa_paths = [os.path.join(msa_dir, fn, "msa.fasta") for fn in os.listdir(msa_dir)]
+    msa_names = [fn.split(".")[0] for fn in os.listdir(msa_dir)]
+    msa_names = [name for name in msa_names if name != ""]
+    msas[cat] = dict(zip(msa_names, msa_paths))
+    all_msa_names[cat] = msa_names
+
+msa_nodup_path = os.path.join(basedir, "{cat}", "msa_nodup", "{msa}.phy")
+raxmlng_prefix = os.path.join(basedir, "{cat}", "raxml", "{msa}", "default_inference")
+selection_stats_path = os.path.join(basedir, "{cat}", "selection_stats", "{msa}.csv")
+
+new_all_msa_names = {}
+for cat, msa_names in all_msa_names.items():
+    new_names = []
+    for msa_name in msa_names:
+        msa_stats = pd.read_csv(os.path.join(basedir, cat, "selection_stats", msa_name + ".csv")).iloc[0]
+        if msa_stats["max_brlen"] < 1 and msa_stats["r_z"] < 0.5:
+            new_names.append(msa_name)
+    new_all_msa_names[cat] = msa_name
+
+bootstrapping_prefix = os.path.join(basedir, "{cat}", "raxml", "{msa}", "bootstrapping")
+best_support_prefix = os.path.join(basedir, "{cat}", "raxml", "{msa}", "support_best")
+shalrt_prefix = os.path.join(basedir, "{cat}", "raxml", "{msa}", "shalrt")
+search80_prefix = os.path.join(basedir, "{cat}", "raxml", "{msa}", "search80")
+search100_prefix = os.path.join(basedir, "{cat}", "raxml", "{msa}", "search100")
+au_prefix = os.path.join(basedir, "{cat}", "raxml", "{msa}", "au")
+consensus_prefix = os.path.join(basedir, "{cat}", "raxml", "{msa}", "plausible_consensus")
+consensus_support_prefix = os.path.join(basedir, "{cat}", "raxml", "{msa}", "consensus_support")
+label_prefix = os.path.join(basedir, "{cat}", "difficulty_labels", "{msa}", "difficulty_label")
+collapsed_label_prefix = os.path.join(basedir, "{cat}", "difficulty_labels", "{msa}", "difficulty_label_collapsed")
+
+rule all:
+    input:
+        expand(best_support_prefix + ".raxml.support", cat = ["treebase"], msa=new_all_msa_names["treebase"]) + \
+        expand(best_support_prefix + ".raxml.support", cat = ["sim"], msa=new_all_msa_names["sim"]),
+        #expand(shalrt_prefix + ".raxml.supportSH", cat = ["treebase"], msa=new_all_msa_names["treebase"]) + \
+        #expand(shalrt_prefix + ".raxml.supportSH", cat = ["sim"], msa=new_all_msa_names["sim"]),
+        expand(consensus_support_prefix + ".raxml.support", cat = ["treebase"], msa=new_all_msa_names["treebase"]) + \
+        expand(consensus_support_prefix + ".raxml.support", cat = ["sim"], msa=new_all_msa_names["sim"]),
+        #expand(search80_prefix + ".raxml.mlTrees", cat = ["treebase"], msa=new_all_msa_names["treebase"]) + \
+        #expand(search80_prefix + ".raxml.mlTrees", cat = ["sim"], msa=new_all_msa_names["sim"]),
+        expand(search100_prefix + ".raxml.mlTreesCollapsedStrict", cat = ["treebase"], msa=new_all_msa_names["treebase"]) + \
+        expand(search100_prefix + ".raxml.mlTreesCollapsedStrict", cat = ["sim"], msa=new_all_msa_names["sim"]),
+        expand(label_prefix + ".csv", cat = ["treebase"], msa=new_all_msa_names["treebase"]) + \
+        expand(label_prefix + ".csv", cat = ["sim"], msa=new_all_msa_names["sim"]),
+        expand(collapsed_label_prefix + ".csv", cat = ["treebase"], msa=new_all_msa_names["treebase"]) + \
+        expand(collapsed_label_prefix + ".csv", cat = ["sim"], msa=new_all_msa_names["sim"]),
+
+
+
+
+
+
+include: "rules/bootstrapping.smk"
+include: "rules/collapse_best_tree.smk"
+include: "rules/collapse_bootstrap_trees.smk"
+include: "rules/support_best.smk"
+include: "rules/shalrt.smk"
+include: "rules/search80.smk"
+include: "rules/fuse_ml_trees.smk"
+include: "rules/collapse_ml_trees.smk"
+include: "rules/au.smk"
+include: "rules/filter_plausible.smk"
+include: "rules/plausible_consensus.smk"
+include: "rules/support_consensus.smk"
+include: "rules/generate_label.smk"
+include: "rules/generate_label_collapsed.smk"
+include: "rules/find_best_tree.smk"
+include: "rules/collapse_best_tree80.smk"
+include: "rules/find_best_tree_collapsed.smk"
