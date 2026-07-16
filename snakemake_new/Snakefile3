@@ -3,21 +3,21 @@ import sys
 import pathlib
 import pandas as pd
 
-basedir = "/hits/fast/cme/haeusele/adaptive_bootstrapping/data_new"
-cats = ["treebase", "sim"]
+basedir = "/hits/fast/cme/haeusele/adaptive_bootstrapping/difficult_data"
+cats = ["evonaps_difficult", "alisim2"]
 msas = {}
 all_msa_names = {}
 all_true_trees = {}
 all_true_trees_collapsed = {}
-for cat in ["treebase", "sim"]:
+for cat in cats:
     msa_dir = os.path.join(basedir, cat, "msa")
-    msa_paths = [os.path.join(msa_dir, fn, "msa.fasta") for fn in os.listdir(msa_dir)]
+    msa_paths = [os.path.join(msa_dir, fn) for fn in os.listdir(msa_dir)]
     msa_names = [fn.split(".")[0] for fn in os.listdir(msa_dir)]
     msa_names = [name for name in msa_names if name != ""]
     msas[cat] = dict(zip(msa_names, msa_paths))
     all_msa_names[cat] = msa_names
-    if cat == "sim":
-        true_tree_paths = [os.path.join(basedir, cat, "true_trees_nodup", fn.split(".")[0] + ".tree") for fn in os.listdir(msa_dir)] 
+    if cat == "alisim2":
+        true_tree_paths = [os.path.join(basedir, cat, "true_trees_nodup", fn.split(".")[0] + ".tree") for fn in os.listdir(msa_dir)]
         true_tree_paths_collapsed = [os.path.join(basedir, cat, "true_trees_collapsed", fn.split(".")[0] + ".tree") for fn in os.listdir(msa_dir)]
     else:
         true_tree_paths = ["" for fn in os.listdir(msa_dir)]
@@ -32,22 +32,29 @@ selection_stats_path = os.path.join(basedir, "{cat}", "selection_stats", "{msa}.
 new_all_msa_names = {}
 for cat, msa_names in all_msa_names.items():
     new_names = []
+    diff_pred = pd.read_csv(os.path.join(basedir, cat, "difficulty_prediction_nodup.csv"))
     for msa_name in msa_names:
+        pred_row = diff_pred[diff_pred["dataset"] == msa_name]
+        if len(pred_row) == 0:
+            continue
+        diff = pred_row["difficulty_prediction"].iloc[0]
+        if diff < 0.6:
+            continue
         stats_path = os.path.join(basedir, cat, "selection_stats", msa_name + ".csv")
         best_tree_path = os.path.join(basedir, cat, "raxml", msa_name, "default_inference.raxml.bestTree")
         if not os.path.isfile(stats_path) or not os.path.isfile(best_tree_path):
-            print(stats_path)
-            print(best_tree_path)
             continue
         msa_stats = pd.read_csv(stats_path).iloc[0]
         if msa_stats["max_brlen"] < 1 and msa_stats["r_z"] < 0.5:
             new_names.append(msa_name)
     print(len(new_names))
+    print(new_names)
     new_all_msa_names[cat] = new_names 
-#new_msas = {}
-#for cat in ["treebase", "sim"]:
-#    new_msas[cat] = { name : path for (name, path) in msas[cat].items() if name in new_all_msa_names[cat]}
-#msas = new_msas
+
+new_msas = {}
+for cat in cats:
+    new_msas[cat] = { name : path for (name, path) in msas[cat].items() if name in new_all_msa_names[cat]}
+msas = new_msas
 
 
 bootstrapping_prefix = os.path.join(basedir, "{cat}", "raxml", "{msa}", "bootstrapping")
@@ -59,7 +66,6 @@ consensus_prefix = os.path.join(basedir, "{cat}", "raxml", "{msa}", "plausible_c
 consensus_support_prefix = os.path.join(basedir, "{cat}", "raxml", "{msa}", "consensus_support")
 label_prefix = os.path.join(basedir, "{cat}", "difficulty_labels", "{msa}", "difficulty_label")
 collapsed_label_prefix = os.path.join(basedir, "{cat}", "difficulty_labels", "{msa}", "difficulty_label_collapsed")
-
 consensus_branch_stats_path = os.path.join(basedir, "{cat}", "consensus_branch_stats", "{msa}.csv")
 best_branch_stats_path = os.path.join(basedir, "{cat}", "best_branch_stats", "{msa}.csv")
 best_branch_stats_collapsed_path = os.path.join(basedir, "{cat}", "best_tt_collapsed_branch_stats", "{msa}.csv")
@@ -67,18 +73,18 @@ best_branch_stats_collapsed_path = os.path.join(basedir, "{cat}", "best_tt_colla
 rule all:
     input:
         #expand(best_branch_stats_collapsed_path, cat = ["sim"], msa=new_all_msa_names["sim"]),
-        expand(best_branch_stats_path, cat = ["treebase"], msa=new_all_msa_names["treebase"]) + \
-        expand(best_branch_stats_path, cat = ["sim"], msa=new_all_msa_names["sim"]),
-        expand(consensus_branch_stats_path, cat = ["treebase"], msa=new_all_msa_names["treebase"]) + \
-        expand(consensus_branch_stats_path, cat = ["sim"], msa=new_all_msa_names["sim"]),
-        #expand(search80_prefix + ".raxml.mlTrees", cat = ["treebase"], msa=new_all_msa_names["treebase"]) + \
-        #expand(search80_prefix + ".raxml.mlTrees", cat = ["sim"], msa=new_all_msa_names["sim"]),
-        expand(search100_prefix + ".raxml.mlTreesCollapsedStrict", cat = ["treebase"], msa=new_all_msa_names["treebase"]) + \
-        expand(search100_prefix + ".raxml.mlTreesCollapsedStrict", cat = ["sim"], msa=new_all_msa_names["sim"]),
-        expand(label_prefix + ".csv", cat = ["treebase"], msa=new_all_msa_names["treebase"]) + \
-        expand(label_prefix + ".csv", cat = ["sim"], msa=new_all_msa_names["sim"]),
-        expand(collapsed_label_prefix + ".csv", cat = ["treebase"], msa=new_all_msa_names["treebase"]) + \
-        expand(collapsed_label_prefix + ".csv", cat = ["sim"], msa=new_all_msa_names["sim"]),
+        expand(best_branch_stats_path, cat = ["evonaps_difficult"], msa=new_all_msa_names["evonaps_difficult"]) + \
+        expand(best_branch_stats_path, cat = ["alisim2"], msa=new_all_msa_names["alisim2"]),
+        #expand(consensus_branch_stats_path, cat = ["evonaps_difficult"], msa=new_all_msa_names["evonaps_difficult"]) + \
+        #expand(consensus_branch_stats_path, cat = ["alisim2"], msa=new_all_msa_names["alisim2"]),
+        #expand(search80_prefix + ".raxml.mlTrees", cat = ["evonaps_difficult"], msa=new_all_msa_names["evonaps_difficult"]) + \
+        #expand(search80_prefix + ".raxml.mlTrees", cat = ["alisim2"], msa=new_all_msa_names["alisim2"]),
+        expand(search100_prefix + ".raxml.mlTreesCollapsedStrict", cat = ["evonaps_difficult"], msa=new_all_msa_names["evonaps_difficult"]) + \
+        expand(search100_prefix + ".raxml.mlTreesCollapsedStrict", cat = ["alisim2"], msa=new_all_msa_names["alisim2"]),
+        expand(label_prefix + ".csv", cat = ["evonaps_difficult"], msa=new_all_msa_names["evonaps_difficult"]) + \
+        expand(label_prefix + ".csv", cat = ["alisim2"], msa=new_all_msa_names["alisim2"]),
+        expand(collapsed_label_prefix + ".csv", cat = ["evonaps_difficult"], msa=new_all_msa_names["evonaps_difficult"]) + \
+        expand(collapsed_label_prefix + ".csv", cat = ["alisim2"], msa=new_all_msa_names["alisim2"]),
 
 
 
@@ -102,7 +108,5 @@ include: "rules/find_best_tree.smk"
 include: "rules/collapse_best_tree80.smk"
 include: "rules/find_best_tree_collapsed.smk"
 include: "rules/evaluate_branches_best.smk"
-include: "rules/evaluate_branches_best_collapsed.smk"
 include: "rules/evaluate_branches_consensus.smk"
-#include: "rules/remove_duplicates_from_true_tree.smk"
-#include: "rules/collapse_true_tree.smk"
+

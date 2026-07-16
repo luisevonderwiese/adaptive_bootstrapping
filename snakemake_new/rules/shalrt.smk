@@ -1,7 +1,7 @@
 rule shalrt:
     input:
        msa_nodup = msa_nodup_path, 
-       best_tree = raxmlng_prefix + ".raxml.bestTreeCollapsedStrict"
+       best_tree = raxmlng_prefix + ".raxml.bestTree"
     output:
         support_tree = shalrt_prefix + ".raxml.supportSH",
     params:

@@ -3,21 +3,21 @@ import sys
 import pathlib
 import pandas as pd
 
-basedir = "/hits/fast/cme/haeusele/adaptive_bootstrapping/data_new"
-cats = ["treebase", "sim"]
+basedir = "/hits/fast/cme/haeusele/adaptive_bootstrapping/difficult_data"
+cats = ["evonaps_difficult", "alisim2"]
 msas = {}
 all_msa_names = {}
 all_true_trees = {}
 
 for cat in cats:
     msa_dir = os.path.join(basedir, cat, "msa")
-    msa_paths = [os.path.join(msa_dir, fn, "msa.fasta") for fn in os.listdir(msa_dir)]
+    msa_paths = [os.path.join(msa_dir, fn) for fn in os.listdir(msa_dir)]
     msa_names = [fn.split(".")[0] for fn in os.listdir(msa_dir)]
     msa_names = [name for name in msa_names if name != ""]
     msas[cat] = dict(zip(msa_names, msa_paths))
     all_msa_names[cat] = msa_names
-    if cat == "sim":
-        true_tree_paths = [os.path.join(msa_dir, fn, "true.tree") for fn in os.listdir(msa_dir)]
+    if cat == "alisim2":
+        true_tree_paths = [os.path.join(basedir, cat, "simtrees", fn.split(".")[0] + ".tree") for fn in os.listdir(msa_dir)]
     else:
         true_tree_paths = ["" for fn in os.listdir(msa_dir)]
     all_true_trees[cat] = dict(zip(msa_names, true_tree_paths))
@@ -30,9 +30,9 @@ true_tree_collapsed_path = os.path.join(basedir, "{cat}", "true_trees_collapsed"
 
 rule all:
     input:
-        expand(selection_stats_path, cat = ["treebase"], msa=all_msa_names["treebase"]) + \
-        expand(selection_stats_path, cat = ["sim"], msa=all_msa_names["sim"]),
-        expand(true_tree_collapsed_path, cat = ["sim"], msa=all_msa_names["sim"]),
+        expand(selection_stats_path, cat = ["evonaps_difficult"], msa=all_msa_names["evonaps_difficult"]) + \
+        expand(selection_stats_path, cat = ["alisim2"], msa=all_msa_names["alisim2"]),
+        expand(true_tree_collapsed_path, cat = ["alisim2"], msa=all_msa_names["alisim2"]),
 
 include: "rules/remove_duplicates.smk"
 include: "rules/remove_duplicates_from_true_tree.smk"

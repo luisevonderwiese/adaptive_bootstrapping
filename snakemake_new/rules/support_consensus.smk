@@ -1,4 +1,6 @@
 rule support_consensus:
+    group:
+        "msa_{cat}_{msa}"
     input:
        bs_trees = bootstrapping_prefix + ".raxml.bootstrapsCollapsedStrict",
        consensus_tree = consensus_prefix + ".raxml.consensusTreeMR"

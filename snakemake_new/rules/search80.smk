@@ -3,6 +3,8 @@ rule search80:
         msa_nodup = msa_nodup_path,
     output:
         ml_tree = search80_prefix + ".raxml.mlTrees",
+        best_tree = search80_prefix + ".raxml.bestTree",
+        log = search80_prefix + ".raxml.log",
     params:
         prefix  = search80_prefix,
     log:

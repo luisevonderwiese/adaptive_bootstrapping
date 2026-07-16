@@ -23,7 +23,7 @@ def bipartition_in_tree(bip, tree_other, all_leaves_other):
 
 
 def evaluate(base_dir, prefix, name):
-    out_path = os.path.join(base_dir, name + ".csv")
+    out_path = os.path.join(name + ".csv")
     
     results_dir = os.path.join(base_dir, "bootstrapping")
     data_dir = os.path.join(base_dir, "msa")
@@ -32,7 +32,10 @@ def evaluate(base_dir, prefix, name):
 
     for dataset in os.listdir(results_dir):
         dataset = dataset.split(".")[0]
-        tree_inf_path = os.path.join(results_dir, dataset, prefix + ".raxml.supportEBG")
+        if name == "ebg_Support":
+            tree_inf_path = os.path.join(results_dir, dataset, prefix + ".raxml.supportEBG")
+        else:
+            tree_inf_path = os.path.join(results_dir, dataset, prefix + ".raxml.support")
         try:
             tree_inf = ete3.Tree(tree_inf_path, format=0)
         except ete3.parser.newick.NewickError as e:
@@ -70,5 +73,5 @@ def evaluate(base_dir, prefix, name):
     df_res.to_csv(out_path)
 
 
-
-evaluate("data/sim", "ebg", "ebg_Support")
+evaluate("/hits/fast/cme/haeusele/adaptive_bootstrapping/data/sim", "bootstrap", "sbs_Support")
+evaluate("/hits/fast/cme/haeusele/adaptive_bootstrapping/data/sim", "ebg", "ebg_Support")

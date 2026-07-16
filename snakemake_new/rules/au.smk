@@ -1,4 +1,6 @@
 rule au:
+    group:
+        "msa_{cat}_{msa}"
     input:
         msa_nodup = msa_nodup_path,
         ml_trees = search100_prefix + ".raxml.mlTrees",

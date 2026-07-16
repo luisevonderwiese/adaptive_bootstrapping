@@ -10,7 +10,7 @@ import sys
 msa_path = snakemake.params.msa
 outpath = snakemake.output.msa_nodup
 ending = msa_path.split(".")[-1]
-if ending == "fasta":
+if ending == "fasta" or ending == "fa":
     f = "fasta"
 elif ending == "phy" or ending == "phylip":
     f = "phylip-relaxed"

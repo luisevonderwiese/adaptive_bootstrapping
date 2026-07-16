@@ -1,4 +1,6 @@
 rule plausible_consensus:
+    group:
+        "msa_{cat}_{msa}"
     input:
         plausible_trees = search100_prefix + ".raxml.plausibleTrees"
     output:

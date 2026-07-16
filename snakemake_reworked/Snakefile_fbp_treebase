@@ -1,0 +1,58 @@
+import os
+import sys
+import pathlib
+
+
+
+d = "../data/treebase/msa" 
+res_d = "../data/treebase/bootstrapping"
+msa_paths = [os.path.join(d, fn) for fn in os.listdir(d)]
+msa_names = [str(os.path.split(pth)[1]).split(".")[0] for pth in msa_paths]
+msa_names = [name for name in msa_names if name != ""]
+msas = dict(zip(msa_names, msa_paths))
+
+raxmlng_prefix = pathlib.Path(res_d) / "{msa}"/ "fbp"
+bs_trees = pathlib.Path(res_d) / "{msa}"/ "bootstrap.raxml.bootstraps"
+best_tree = pathlib.Path(res_d) / "{msa}"/ "inference.raxml.bestTree"
+
+rule all:
+    input:
+        expand(raxmlng_prefix.with_suffix(".raxml.support"), msa=msa_names),
+
+
+
+
+rule bootstrapping:
+    output:
+        raxml_bootstraps = raxmlng_prefix.with_suffix(".raxml.support"),
+    params:
+        prefix  = str(raxmlng_prefix),
+        bs_trees = str(bs_trees),
+        best_tree = str(best_tree),
+        msa     = lambda wildcards: msas[wildcards.msa],
+    log:
+        raxml_log = raxmlng_prefix.with_suffix(".raxml.fbp.log")
+    threads: 8
+    resources:
+        mem_mb = 4000,
+        disk_mb = 4000,
+        run_time = 480,
+    shell:
+        "./raxml-ng --support "
+        "--tree {params.best_tree} "
+        "--bs-trees {params.bs_trees} "
+        "--bs-metric fbp "
+        "--prefix {params.prefix} "
+        "--seed 2 "
+        "--threads 8 "
+        "--force model_lh_impr "
+        #"--force perf_threads "
+        "> {log.raxml_log} "
+
+
+
+
+
+
+
+

@@ -4,4 +4,13 @@ test_data/
 sim_data_sampling/output
 snakemake_new/.snakemake/
 old_scripts/
-problematic/
+
+
+bayesboot_data/
+difficult_test/
+data_old/
+data_reworked/
+difficult_data/alisim2/
+difficult_data/evonaps_difficult/
+snakemake_reworked/.snakemake/
+
