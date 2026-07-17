@@ -10,7 +10,17 @@ bayesboot_data/
 difficult_test/
 data_old/
 data_reworked/
+
 difficult_data/alisim2/
 difficult_data/evonaps_difficult/
+difficult_data/alisim/
+difficult_data/BL_MIN.png
+difficult_data/PYTHIA_SCORE.png
+difficult_data/dna_data.tsv
+difficult_data/iqtree3
+difficult_data/iqtree3_intel
+difficult_data/nm
+difficult_data/simtrees/
+
 snakemake_reworked/.snakemake/
 
