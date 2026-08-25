@@ -21,6 +21,7 @@ difficult_data/iqtree3
 difficult_data/iqtree3_intel
 difficult_data/nm
 difficult_data/simtrees/
+difficult_data/simtree_supports/*
 
 snakemake_reworked/.snakemake/
 
