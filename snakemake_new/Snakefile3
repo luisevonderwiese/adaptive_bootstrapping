@@ -75,8 +75,8 @@ rule all:
         #expand(best_branch_stats_collapsed_path, cat = ["sim"], msa=new_all_msa_names["sim"]),
         expand(best_branch_stats_path, cat = ["evonaps_difficult"], msa=new_all_msa_names["evonaps_difficult"]) + \
         expand(best_branch_stats_path, cat = ["alisim2"], msa=new_all_msa_names["alisim2"]),
-        #expand(consensus_branch_stats_path, cat = ["evonaps_difficult"], msa=new_all_msa_names["evonaps_difficult"]) + \
-        #expand(consensus_branch_stats_path, cat = ["alisim2"], msa=new_all_msa_names["alisim2"]),
+        expand(consensus_branch_stats_path, cat = ["evonaps_difficult"], msa=new_all_msa_names["evonaps_difficult"]) + \
+        expand(consensus_branch_stats_path, cat = ["alisim2"], msa=new_all_msa_names["alisim2"]),
         #expand(search80_prefix + ".raxml.mlTrees", cat = ["evonaps_difficult"], msa=new_all_msa_names["evonaps_difficult"]) + \
         #expand(search80_prefix + ".raxml.mlTrees", cat = ["alisim2"], msa=new_all_msa_names["alisim2"]),
         expand(search100_prefix + ".raxml.mlTreesCollapsedStrict", cat = ["evonaps_difficult"], msa=new_all_msa_names["evonaps_difficult"]) + \

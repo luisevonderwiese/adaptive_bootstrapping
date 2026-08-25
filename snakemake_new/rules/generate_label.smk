@@ -1,10 +1,8 @@
 rule generate_label:
     input:
         msa_nodup = msa_nodup_path,
-        ml_trees = search100_prefix + ".raxml.mlTrees",
-        best_tree = search100_prefix + ".raxml.bestTree"
     output:
-        bootstraps = label_prefix + ".csv",
+        label = label_prefix + ".csv",
     params:
         prefix  = label_prefix,
     log:
@@ -17,12 +15,11 @@ rule generate_label:
     shell:
         "label "
         "--msa {input.msa_nodup} "
-        "--mltrees {input.ml_trees} "
-        "--besttree {input.best_tree} "
         "--model  GTR+G "
         "--prefix {params.prefix} "
         "--raxmlng /hits/fast/cme/haeusele/adaptive_bootstrapping/snakemake_new/bin/raxml-ng "
         "--iqtree /hits/fast/cme/haeusele/adaptive_bootstrapping/snakemake_new/bin/iqtree2 "
+        "--ntrees 100 "
         "--seed 2 "
         "--threads 8 "
         "--redo "

@@ -29,7 +29,7 @@ msa_nodup_path = os.path.join(basedir, "{cat}", "msa_nodup", "{msa}.phy")
 raxmlng_prefix = os.path.join(basedir, "{cat}", "raxml", "{msa}", "default_inference")
 selection_stats_path = os.path.join(basedir, "{cat}", "selection_stats", "{msa}.csv")
 
-new_all_msa_names = {}
+all_new_msa_names = {}
 for cat, msa_names in all_msa_names.items():
     new_names = []
     for msa_name in msa_names:
@@ -39,46 +39,46 @@ for cat, msa_names in all_msa_names.items():
             print(stats_path)
             print(best_tree_path)
             continue
-        msa_stats = pd.read_csv(stats_path).iloc[0]
-        if msa_stats["max_brlen"] < 1 and msa_stats["r_z"] < 0.5:
-            new_names.append(msa_name)
-    print(len(new_names))
-    new_all_msa_names[cat] = new_names 
-#new_msas = {}
-#for cat in ["treebase", "sim"]:
-#    new_msas[cat] = { name : path for (name, path) in msas[cat].items() if name in new_all_msa_names[cat]}
-#msas = new_msas
+#        msa_stats = pd.read_csv(stats_path).iloc[0]
+#        if msa_stats["max_brlen"] < 1 and msa_stats["r_z"] < 0.5:
+        new_names.append(msa_name)
+#    print(len(new_names))
+    all_new_msa_names[cat] = new_names 
 
 
 bootstrapping_prefix = os.path.join(basedir, "{cat}", "raxml", "{msa}", "bootstrapping")
 best_support_prefix = os.path.join(basedir, "{cat}", "raxml", "{msa}", "support_best")
-search80_prefix = os.path.join(basedir, "{cat}", "raxml", "{msa}", "search80")
-search100_prefix = os.path.join(basedir, "{cat}", "raxml", "{msa}", "search100")
-au_prefix = os.path.join(basedir, "{cat}", "raxml", "{msa}", "au")
-consensus_prefix = os.path.join(basedir, "{cat}", "raxml", "{msa}", "plausible_consensus")
-consensus_support_prefix = os.path.join(basedir, "{cat}", "raxml", "{msa}", "consensus_support")
+best_expanded_support_prefix = os.path.join(basedir, "{cat}", "raxml", "{msa}", "support_best_expanded")
+#search80_prefix = os.path.join(basedir, "{cat}", "raxml", "{msa}", "search80")
+#search100_prefix = os.path.join(basedir, "{cat}", "raxml", "{msa}", "search100")
+#au_prefix = os.path.join(basedir, "{cat}", "raxml", "{msa}", "au")
+#consensus_prefix = os.path.join(basedir, "{cat}", "raxml", "{msa}", "plausible_consensus")
+#consensus_support_prefix = os.path.join(basedir, "{cat}", "raxml", "{msa}", "consensus_support")
 label_prefix = os.path.join(basedir, "{cat}", "difficulty_labels", "{msa}", "difficulty_label")
 collapsed_label_prefix = os.path.join(basedir, "{cat}", "difficulty_labels", "{msa}", "difficulty_label_collapsed")
 
-consensus_branch_stats_path = os.path.join(basedir, "{cat}", "consensus_branch_stats", "{msa}.csv")
+#consensus_branch_stats_path = os.path.join(basedir, "{cat}", "consensus_branch_stats", "{msa}.csv")
 best_branch_stats_path = os.path.join(basedir, "{cat}", "best_branch_stats", "{msa}.csv")
-best_branch_stats_collapsed_path = os.path.join(basedir, "{cat}", "best_tt_collapsed_branch_stats", "{msa}.csv")
+#best_expanded_branch_stats_path = os.path.join(basedir, "{cat}", "best_expanded_branch_stats", "{msa}.csv")
+#best_branch_stats_collapsed_path = os.path.join(basedir, "{cat}", "best_tt_collapsed_branch_stats", "{msa}.csv")
 
 rule all:
     input:
-        #expand(best_branch_stats_collapsed_path, cat = ["sim"], msa=new_all_msa_names["sim"]),
-        expand(best_branch_stats_path, cat = ["treebase"], msa=new_all_msa_names["treebase"]) + \
-        expand(best_branch_stats_path, cat = ["sim"], msa=new_all_msa_names["sim"]),
-        expand(consensus_branch_stats_path, cat = ["treebase"], msa=new_all_msa_names["treebase"]) + \
-        expand(consensus_branch_stats_path, cat = ["sim"], msa=new_all_msa_names["sim"]),
-        #expand(search80_prefix + ".raxml.mlTrees", cat = ["treebase"], msa=new_all_msa_names["treebase"]) + \
-        #expand(search80_prefix + ".raxml.mlTrees", cat = ["sim"], msa=new_all_msa_names["sim"]),
-        expand(search100_prefix + ".raxml.mlTreesCollapsedStrict", cat = ["treebase"], msa=new_all_msa_names["treebase"]) + \
-        expand(search100_prefix + ".raxml.mlTreesCollapsedStrict", cat = ["sim"], msa=new_all_msa_names["sim"]),
-        expand(label_prefix + ".csv", cat = ["treebase"], msa=new_all_msa_names["treebase"]) + \
-        expand(label_prefix + ".csv", cat = ["sim"], msa=new_all_msa_names["sim"]),
-        expand(collapsed_label_prefix + ".csv", cat = ["treebase"], msa=new_all_msa_names["treebase"]) + \
-        expand(collapsed_label_prefix + ".csv", cat = ["sim"], msa=new_all_msa_names["sim"]),
+        #expand(best_branch_stats_collapsed_path, cat = ["sim"], msa=all_new_msa_names["sim"]),
+        expand(best_branch_stats_path, cat = ["treebase"], msa=all_new_msa_names["treebase"]) + \
+        expand(best_branch_stats_path, cat = ["sim"], msa=all_new_msa_names["sim"]),
+        #expand(best_expanded_branch_stats_path, cat = ["treebase"], msa=all_new_msa_names["treebase"]) + \
+        #expand(best_expanded_branch_stats_path, cat = ["sim"], msa=all_new_msa_names["sim"]),
+        #expand(consensus_branch_stats_path, cat = ["treebase"], msa=all_new_msa_names["treebase"]) + \
+        #expand(consensus_branch_stats_path, cat = ["sim"], msa=all_new_msa_names["sim"]),
+        #expand(search80_prefix + ".raxml.mlTrees", cat = ["treebase"], msa=all_new_msa_names["treebase"]) + \
+        #expand(search80_prefix + ".raxml.mlTrees", cat = ["sim"], msa=all_new_msa_names["sim"]),
+        #expand(search100_prefix + ".raxml.mlTreesCollapsedStrict", cat = ["treebase"], msa=all_new_msa_names["treebase"]) + \
+        #expand(search100_prefix + ".raxml.mlTreesCollapsedStrict", cat = ["sim"], msa=all_new_msa_names["sim"]),
+        expand(label_prefix + ".csv", cat = ["treebase"], msa=all_new_msa_names["treebase"]) + \
+        expand(label_prefix + ".csv", cat = ["sim"], msa=all_new_msa_names["sim"]),
+        #expand(collapsed_label_prefix + ".csv", cat = ["treebase"], msa=all_new_msa_names["treebase"]) + \
+        #expand(collapsed_label_prefix + ".csv", cat = ["sim"], msa=all_new_msa_names["sim"]),
 
 
 
@@ -89,20 +89,22 @@ include: "rules/bootstrapping.smk"
 include: "rules/collapse_best_tree.smk"
 include: "rules/collapse_bootstrap_trees.smk"
 include: "rules/support_best.smk"
-include: "rules/search80.smk"
-include: "rules/fuse_ml_trees.smk"
-include: "rules/collapse_ml_trees.smk"
-include: "rules/au.smk"
-include: "rules/filter_plausible.smk"
-include: "rules/plausible_consensus.smk"
-include: "rules/support_consensus.smk"
+#include: "rules/support_best_expanded.smk"
+#include: "rules/search80.smk"
+#include: "rules/fuse_ml_trees.smk"
+#include: "rules/collapse_ml_trees.smk"
+#include: "rules/au.smk"
+#include: "rules/filter_plausible.smk"
+#include: "rules/plausible_consensus.smk"
+#include: "rules/support_consensus.smk"
 include: "rules/generate_label.smk"
-include: "rules/generate_label_collapsed.smk"
-include: "rules/find_best_tree.smk"
-include: "rules/collapse_best_tree80.smk"
-include: "rules/find_best_tree_collapsed.smk"
+#include: "rules/generate_label_collapsed.smk"
+#include: "rules/find_best_tree.smk"
+#include: "rules/collapse_best_tree80.smk"
+#include: "rules/find_best_tree_collapsed.smk"
 include: "rules/evaluate_branches_best.smk"
-include: "rules/evaluate_branches_best_collapsed.smk"
-include: "rules/evaluate_branches_consensus.smk"
+#include: "rules/evaluate_branches_best_expanded.smk"
+#include: "rules/evaluate_branches_best_collapsed.smk"
+#include: "rules/evaluate_branches_consensus.smk"
 #include: "rules/remove_duplicates_from_true_tree.smk"
 #include: "rules/collapse_true_tree.smk"
