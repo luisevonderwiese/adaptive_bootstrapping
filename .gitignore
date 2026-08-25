@@ -24,3 +24,7 @@ difficult_data/simtrees/
 
 snakemake_reworked/.snakemake/
 
+simulate_difficult/evonaps_sim/*
+simulate_difficult/treebase_sim/*
+
+ebg_stuff/ebg_Support.csv
