@@ -1,0 +1,51 @@
+import os
+import sys
+import pathlib
+import pandas as pd
+
+basedir = "/hits/fast/cme/haeusele/adaptive_bootstrapping/bayesboot_data"
+cats = ["empirical", "sim"]
+msas = {}
+all_msa_names = {}
+all_true_trees = {}
+
+for cat in cats:
+    msa_dir = os.path.join(basedir, cat, "msa")
+    msa_paths = [os.path.join(msa_dir, fn, "msa.phy") for fn in os.listdir(msa_dir)]
+    msa_names = [fn for fn in os.listdir(msa_dir)]
+    msas[cat] = dict(zip(msa_names, msa_paths))
+    all_msa_names[cat] = msa_names
+    if cat == "sim":
+        true_tree_paths = [os.path.join(msa_dir, fn, "true.tree") for fn in os.listdir(msa_dir)]
+    else:
+        true_tree_paths = ["" for fn in os.listdir(msa_dir)]
+    all_true_trees[cat] = dict(zip(msa_names, true_tree_paths))
+
+print(all_msa_names)
+msa_nodup_path = os.path.join(basedir, "{cat}", "msa_nodup", "{msa}.phy")
+raxmlng_prefix = os.path.join(basedir, "{cat}", "raxml", "{msa}", "default_inference")
+selection_stats_path = os.path.join(basedir, "{cat}", "selection_stats", "{msa}.csv")
+true_tree_nodup_path = os.path.join(basedir, "{cat}", "true_trees_nodup", "{msa}.tree")
+#true_tree_collapsed_path = os.path.join(basedir, "{cat}", "true_trees_collapsed", "{msa}.tree")
+
+rule all:
+    input:
+        expand(selection_stats_path, cat = ["empirical"], msa=all_msa_names["empirical"]) + \
+        expand(selection_stats_path, cat = ["sim"], msa=all_msa_names["sim"]),
+        expand(true_tree_nodup_path, cat = ["sim"], msa=all_msa_names["sim"]),
+
+include: "rules/remove_duplicates.smk"
+include: "rules/remove_duplicates_from_true_tree.smk"
+#include: "rules/collapse_true_tree.smk"
+include: "rules/default_inference.smk"
+include: "rules/selection_stats.smk"
+
+
+
+
+
+
+
+
+
+

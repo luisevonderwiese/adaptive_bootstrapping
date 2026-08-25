@@ -1,0 +1,86 @@
+import os
+import sys
+import pathlib
+import pandas as pd
+
+basedir = "/hits/fast/cme/haeusele/adaptive_bootstrapping/bayesboot_data"
+cats = ["empirical", "sim"]
+msas = {}
+all_msa_names = {}
+all_true_trees = {}
+all_true_trees_collapsed = {}
+for cat in ["empirical", "sim"]:
+    msa_dir = os.path.join(basedir, cat, "msa")
+    msa_paths = [os.path.join(msa_dir, fn, "msa.phy") for fn in os.listdir(msa_dir)]
+    msa_names = [fn for fn in os.listdir(msa_dir)]
+    msas[cat] = dict(zip(msa_names, msa_paths))
+    all_msa_names[cat] = msa_names
+    if cat == "sim":
+        true_tree_paths = [os.path.join(basedir, cat, "true_trees_nodup", fn.split(".")[0] + ".tree") for fn in os.listdir(msa_dir)] 
+        true_tree_paths_collapsed = [os.path.join(basedir, cat, "true_trees_collapsed", fn.split(".")[0] + ".tree") for fn in os.listdir(msa_dir)]
+    else:
+        true_tree_paths = ["" for fn in os.listdir(msa_dir)]
+        true_tree_paths_collapsed = ["" for fn in os.listdir(msa_dir)]
+    all_true_trees[cat] = dict(zip(msa_names, true_tree_paths))
+    all_true_trees_collapsed[cat] = dict(zip(msa_names, true_tree_paths_collapsed))
+
+msa_nodup_path = os.path.join(basedir, "{cat}", "msa_nodup", "{msa}.phy")
+raxmlng_prefix = os.path.join(basedir, "{cat}", "raxml", "{msa}", "default_inference")
+selection_stats_path = os.path.join(basedir, "{cat}", "selection_stats", "{msa}.csv")
+
+new_all_msa_names = {}
+for cat, msa_names in all_msa_names.items():
+    new_names = []
+    for msa_name in msa_names:
+        stats_path = os.path.join(basedir, cat, "selection_stats", msa_name + ".csv")
+        best_tree_path = os.path.join(basedir, cat, "raxml", msa_name, "default_inference.raxml.bestTree")
+        if not os.path.isfile(stats_path) or not os.path.isfile(best_tree_path):
+            print(stats_path)
+            print(best_tree_path)
+            continue
+        msa_stats = pd.read_csv(stats_path).iloc[0]
+        if msa_stats["max_brlen"] < 1 and msa_stats["r_z"] < 0.5:
+            new_names.append(msa_name)
+    print(len(new_names))
+    new_all_msa_names[cat] = new_names 
+
+bootstrapping_prefix = os.path.join(basedir, "{cat}", "raxml", "{msa}", "bootstrapping")
+best_support_prefix = os.path.join(basedir, "{cat}", "raxml", "{msa}", "support_best")
+bootstrapping_bayesian_prefix = os.path.join(basedir, "{cat}", "raxml", "{msa}", "bootstrapping_bayesian")
+best_bayesian_support_prefix = os.path.join(basedir, "{cat}", "raxml", "{msa}", "support_best_bayesian")
+search80_prefix = os.path.join(basedir, "{cat}", "raxml", "{msa}", "search80")
+search100_prefix = os.path.join(basedir, "{cat}", "raxml", "{msa}", "search100")
+label_prefix = os.path.join(basedir, "{cat}", "difficulty_labels", "{msa}", "difficulty_label")
+
+best_branch_stats_path = os.path.join(basedir, "{cat}", "best_branch_stats", "{msa}.csv")
+best_bayesian_branch_stats_path = os.path.join(basedir, "{cat}", "best_bayesian_branch_stats", "{msa}.csv")
+
+rule all:
+    input:
+        expand(best_branch_stats_path, cat = ["empirical"], msa=new_all_msa_names["empirical"]) + \
+        expand(best_branch_stats_path, cat = ["sim"], msa=new_all_msa_names["sim"]),
+        expand(best_bayesian_branch_stats_path, cat = ["empirical"], msa=new_all_msa_names["empirical"]) + \
+        expand(best_bayesian_branch_stats_path, cat = ["sim"], msa=new_all_msa_names["sim"]),
+        expand(label_prefix + ".csv", cat = ["empirical"], msa=new_all_msa_names["empirical"]) + \
+        expand(label_prefix + ".csv", cat = ["sim"], msa=new_all_msa_names["sim"]),
+
+
+
+
+
+
+include: "rules/bootstrapping.smk"
+include: "rules/bootstrapping_bayesian.smk"
+include: "rules/collapse_best_tree.smk"
+include: "rules/collapse_bootstrap_trees.smk"
+include: "rules/collapse_bayesian_bootstrap_trees.smk"
+include: "rules/support_best.smk"
+include: "rules/support_best_bayesian.smk"
+include: "rules/search80.smk"
+include: "rules/fuse_ml_trees.smk"
+include: "rules/generate_label.smk"
+include: "rules/find_best_tree.smk"
+include: "rules/collapse_best_tree80.smk"
+include: "rules/find_best_tree_collapsed.smk"
+include: "rules/evaluate_branches_best.smk"
+include: "rules/evaluate_branches_best_bayesian.smk"
