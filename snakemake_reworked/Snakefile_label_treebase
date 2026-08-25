@@ -3,13 +3,11 @@ import sys
 import pathlib
 
 
-
-d = "../data/sim/msa" 
-res_d = "../data/sim/difficulty_labels"
+d = "../data_reworked/treebase/msa"
+res_d = "../data_reworked/treebase/difficulty_labels"
 msa_paths = [os.path.join(d, fn) for fn in os.listdir(d)]
 msa_names = [str(os.path.split(pth)[1]).split(".")[0] for pth in msa_paths]
 msa_names = [name for name in msa_names if name != ""]
-msa_paths = [os.path.join(msa_path, "gtr_g_sim_msa.fasta") for msa_path in msa_paths]
 msas = dict(zip(msa_names, msa_paths))
 
 raxmlng_prefix = pathlib.Path(res_d) / "{msa}"/ "labelGen"
