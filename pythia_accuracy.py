@@ -12,12 +12,13 @@ def plot_accuracy(base_dir, data_type, nodup_prediction):
     else:
         predict_path = os.path.join(base_dir, data_type, "difficulty_prediction.csv")
     df = pd.read_csv(predict_path).merge(pd.read_csv(os.path.join(base_dir, data_type, "difficulty_labels.csv"), index_col=0), on = "dataset", how = "inner")
-    plt.figure(figsize=(20, 10))
-    plt.scatter(df["difficulty"], df["difficulty_prediction"], s = 10)
+    plt.figure(figsize=(9, 6))
+    plt.scatter(df["difficulty"], df["difficulty_prediction"], s = 6)
     mae = mean_absolute_error(df["difficulty"], df["difficulty_prediction"])
     mape = mean_absolute_percentage_error(df["difficulty"], df["difficulty_prediction"])
     print(mae)
     print(mape)
+    plt.gca().axline((0, 0), slope=1, color='grey', linestyle = "--")
     plt.xlabel("ground truth")
     plt.ylabel("prediction")
     if nodup_prediction:
@@ -34,8 +35,8 @@ def plot_collapse_effect(base_dir, data_type):
     if not os.path.isdir(plots_dir):
         os.makedirs(plots_dir)
     df = pd.read_csv(os.path.join(base_dir, data_type, "difficulty_labels_collapsed.csv")).merge(pd.read_csv(os.path.join(base_dir, data_type, "difficulty_labels.csv"), index_col=0), on = "dataset", how = "inner")
-    plt.figure(figsize=(20, 10))
-    plt.scatter(df["difficulty"], df["difficulty_collapsed"], s = 10)
+    plt.figure(figsize=(9, 6))
+    plt.scatter(df["difficulty"], df["difficulty_collapsed"], s = 6)
     #mae = mean_absolute_error(df["difficulty"], df["difficulty_collapsed"])
     #mape = mean_absolute_percentage_error(df["difficulty"], df["difficulty_collapsed"])
     #print(mae)
@@ -51,8 +52,8 @@ def plot_collapse_effect(base_dir, data_type):
     if not os.path.isdir(plots_dir):
         os.makedirs(plots_dir)
     df = pd.read_csv(os.path.join(base_dir, data_type, "difficulty_labels_collapsed.csv")).merge(pd.read_csv(os.path.join(base_dir, data_type, "difficulty_labels.csv"), index_col=0), on = "dataset", how = "inner")
-    plt.figure(figsize=(20, 10))
-    plt.scatter(df["difficulty"], df["difficulty_collapsed"], s = 10)
+    plt.figure(figsize=(9, 6))
+    plt.scatter(df["difficulty"], df["difficulty_collapsed"], s = 6)
     plt.xlabel("ground truth")
     plt.ylabel("groud truth (collapsed)")
     plt.savefig(os.path.join(plots_dir, "pythia_collapsed.png"))
@@ -63,11 +64,27 @@ def plot_nodup_effect(base_dir, base_dir_nodup, data_type):
     if not os.path.isdir(plots_dir):
         os.makedirs(plots_dir)
     df = pd.read_csv(os.path.join(base_dir_nodup, data_type, "difficulty_labels.csv")).merge(pd.read_csv(os.path.join(base_dir, data_type, "difficulty_labels.csv"), index_col=0), on = "dataset", how = "inner", suffixes = ["_nodup", "_old"])
-    plt.figure(figsize=(20, 10))
-    plt.scatter(df["difficulty_old"], df["difficulty_nodup"], s = 10)
-    plt.xlabel("ground truth (old)")
-    plt.ylabel("groud truth (duplicates removed)")
-    plt.figure(figsize=(20, 10))
+    print(len(df[df["difficulty_old"] >= df["difficulty_nodup"]]) / len(df))
+    equal = 0
+    increase = 0
+    decrease = 0
+    for i, row in df.iterrows():
+        diff = row["difficulty_nodup"] - row["difficulty_old"]
+        if diff == 0:
+            equal += 1
+        elif diff > 0:
+            increase += 1
+        else:
+            decrease += 1
+
+    print("equal", str(equal / len(df)))
+    print("increase", str(increase / len(df)))
+    print("decrease", str(decrease / len(df)))
+    plt.figure(figsize=(9, 6))
+    plt.scatter(df["difficulty_old"], df["difficulty_nodup"], s = 6)
+    plt.xlabel("difficult (original)")
+    plt.ylabel("difficulty (no dup.)")
+    plt.gca().axline((0, 0), slope=1, color='grey', linestyle = "--")
     plt.savefig(os.path.join(plots_dir, "pythia_nodup.png"))
     plt.clf()
 
@@ -75,18 +92,18 @@ def plot_nodup_effect(base_dir, base_dir_nodup, data_type):
 
 
 
-plot_accuracy("difficult_data", "alisim2", False)
-plot_accuracy("difficult_data", "alisim2", True)
-plot_accuracy("difficult_data", "evonaps_difficult", False)
-plot_accuracy("difficult_data", "evonaps_difficult", True)
+#plot_accuracy("difficult_data", "alisim2", False)
+#plot_accuracy("difficult_data", "alisim2", True)
+#plot_accuracy("difficult_data", "evonaps_difficult", False)
+#plot_accuracy("difficult_data", "evonaps_difficult", True)
 
-plot_accuracy("data", "sim", False)
-#plot_accuracy("data", "sim", True)
-plot_accuracy("data", "treebase", False)
-#plot_accuracy("data", "treebase", True)
+#plot_accuracy("data", "sim", False)
+plot_accuracy("data", "sim", True)
+#plot_accuracy("data", "treebase", False)
+plot_accuracy("data", "treebase", True)
 
-plot_collapse_effect("data", "sim")
-plot_collapse_effect("data", "treebase")
+#plot_collapse_effect("data", "sim")
+#plot_collapse_effect("data", "treebase")
 
 plot_nodup_effect("data_reworked", "data", "sim")
 plot_nodup_effect("data_reworked", "data", "treebase")

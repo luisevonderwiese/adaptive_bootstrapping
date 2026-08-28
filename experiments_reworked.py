@@ -23,9 +23,7 @@ remove_collapsed = False
 
 support_data = "sbs_Support"
 
-#combined_plots(branch_stats, support_data, group_by)
-
-data_type = "sim"
+data_type = "sim" #"treebase"
 
 plots_dir = os.path.join("data_reworked", data_type, "plots", group_by)
 if not os.path.isdir(plots_dir):
@@ -41,27 +39,28 @@ print("zero:", str(np.nanmean(df[support_data])))
 df = input_df[input_df["exp_zero"] == True]
 print("exp. zero:", str(np.nanmean(df[support_data])))
 
+#input_df = util.remove_small_buckets(input_df, support_data, group_by, remove_collapsed, plots_dir, auto = False, plot = True, threshold = 0.7, auto_threshold = 1000)
 
 if data_type == "treebase":
     bucket_df = util.get_bucket_df(input_df, support_data, group_by, truth_available = False, remove_collapsed = remove_collapsed)
 else:
-    big_meta_df = util.get_meta_df(input_df, support_data, remove_collapsed)
-    print("Determining general threshold")
+#    big_meta_df = util.get_meta_df(input_df, support_data, remove_collapsed)
+#    print("Determining general threshold")
     t = util.threshold(input_df, support_data, level_of_risk, remove_collapsed)
-    print(t)
-    util.plot_confidence_all(big_meta_df, plots_dir, "", level_of_risk, t)
+#    print(t)
+#    util.plot_confidence_all(big_meta_df, plots_dir, "", level_of_risk, t)
     bucket_df = util.get_bucket_df(input_df, support_data, group_by, True, level_of_risk, t, remove_collapsed)
 
-util.plot_zero_ratio(bucket_df, group_by, plots_dir)
-util.plot_supports_fancy(bucket_df, group_by, plots_dir, "")
 util.plot_prop("num_branches", bucket_df, group_by, plots_dir, suffix = "", param = 1000)
+util.plot_zero_ratio(bucket_df, group_by, plots_dir, truth_available = False)
+util.plot_supports_fancy(bucket_df, group_by, plots_dir, "")
 
-if data_type == "sim":
-    util.plot_supports_fancy(bucket_df, group_by, plots_dir, "_correct")
-    util.plot_supports_fancy(bucket_df, group_by, plots_dir, "_incorrect")
-    util.plot_prop("auc", bucket_df, group_by, plots_dir)
-    util.plot_supports(bucket_df, group_by, plots_dir)
-    util.plot_fixed_threshold(bucket_df, group_by, plots_dir)
-    util.plot_confusion(bucket_df, group_by, plots_dir)
-    util.plot_ind_thresholds(bucket_df, group_by, plots_dir)
-    util.auc_buckets(bucket_df, group_by)
+#if data_type == "sim":
+#    util.plot_supports_fancy(bucket_df, group_by, plots_dir, "_correct")
+#    util.plot_supports_fancy(bucket_df, group_by, plots_dir, "_incorrect")
+#    util.plot_prop("auc", bucket_df, group_by, plots_dir)
+#    util.plot_supports(bucket_df, group_by, plots_dir)
+#    util.plot_fixed_threshold(bucket_df, group_by, plots_dir)
+#    util.plot_confusion(bucket_df, group_by, plots_dir)
+#    util.plot_ind_thresholds(bucket_df, group_by, plots_dir)
+#    util.auc_buckets(bucket_df, group_by)
